@@ -99,10 +99,11 @@ pipeline {
 
                                 // Send email notification for successful build with changelog attached
                                 emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\n",
-                                        subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                        mimeType: 'text/plain',
-                                        to: 'jayadharshini.azuredevops@gmail.com',
-                                        attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
+                                subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                mimeType: 'text/plain',
+                                to: 'jayadharshini.azuredevops@gmail.com',
+                                attachmentsPattern: "${WORKSPACE_PATH}/changelog.txt" 
+
 
                             } else {
                                 echo 'Not a Git repository. Skipping deployment and changelog retrieval.'
