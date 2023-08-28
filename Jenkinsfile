@@ -92,14 +92,14 @@ pipeline {
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
                                 
                                 def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStatus: true)
-                                echo "Changelog:\n${changelog}"
+                                writeFile(file: "${WORKSPACE_PATH}\\changelog.txt", text: changelog)
 
-                                // Send email notification for successful build with changelog
-                                emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
-                                subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                mimeType: 'text/plain',
-                                to: 'jayadharshini.azuredevops@gmail.com',
-                                attachLog: true
+                                // Send email notification for successful build with changelog attached
+                                emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\n",
+                                        subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                        mimeType: 'text/plain',
+                                        to: 'jayadharshini.azuredevops@gmail.com',
+                                        attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
 
                             } else {
                                 echo 'Not a Git repository. Skipping deployment and changelog retrieval.'

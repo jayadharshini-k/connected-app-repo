@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>c5086b09-e718-47d0-8ff7-9c7bd0152544</groupId>
     <artifactId>flowstest</artifactId>
-    <version>9.1.8</version>
+    <version>9.1.9</version>
     <packaging>mule-application</packaging>
     <name>flowstest</name>
     <description />
