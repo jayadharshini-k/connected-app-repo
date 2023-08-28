@@ -1,0 +1,14 @@
+{
+    "extends": "recommended",
+    "rules": {
+        "CatchException": {
+            "enabled": false
+        },
+        "LineLength": {
+            "enabled": false
+        },
+        "TrailingWhitespace": {
+            "enabled": false
+        }
+    }
+}
