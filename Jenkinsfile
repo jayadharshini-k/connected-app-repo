@@ -88,10 +88,13 @@ pipeline {
                         dir("${WORKSPACE_PATH}") {
                             // Check if the Git repository is initialized
                             if (fileExists('.git')) {
-                                // Build and deploy the project using the copied pom.xml
+                               // Build and deploy the project using the copied pom.xml
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
-                                
-                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStatus: true)
+
+                                // Retrieve change logs using git log and capture the output
+                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStdout: true).trim()
+
+                                // Write changelog content to a file
                                 writeFile(file: "${WORKSPACE_PATH}\\changelog.txt", text: changelog)
 
                                 // Send email notification for successful build with changelog attached
