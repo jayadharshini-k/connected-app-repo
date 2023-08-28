@@ -88,9 +88,6 @@ pipeline {
                         dir("${WORKSPACE_PATH}") {
                             // Check if the Git repository is initialized
                             if (fileExists('.git')) {
-                                // Add command to change workspace permissions
-                                bat "icacls ${WORKSPACE_PATH} /grant \"${env.COMPUTERNAME}\\${env.USERNAME}:(OI)(CI)F\" /T"
-
                                 // Build and deploy the project using the copied pom.xml
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
 
@@ -107,8 +104,6 @@ pipeline {
                                          to: 'jayadharshini.azuredevops@gmail.com',
                                          attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
 
-                                // Add command to change workspace permissions back
-                                bat "icacls ${WORKSPACE_PATH} /reset /T"
                             }
                         }
                     } catch (Exception e) {
