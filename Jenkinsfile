@@ -92,7 +92,7 @@ pipeline {
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
 
                                 // Retrieve change logs using git log and capture the output
-                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStdout: true).trim()
+                                def changelog = bat(script: 'git log origin/master', returnStdout: true).trim()
 
                                 // Write changelog content to a file
                                 writeFile(file: "${WORKSPACE_PATH}\\changelog.txt", text: changelog)
