@@ -1,4 +1,4 @@
-/* groovylint-disable GStringExpressionWithinString, LineLength, NestedBlockDepth, NoDef, VariableTypeRequired */
+/* groovylint-disable CatchException, GStringExpressionWithinString, LineLength, NestedBlockDepth, NoDef, VariableTypeRequired */
 pipeline {
     agent any
 
@@ -81,7 +81,7 @@ pipeline {
                     writeFile(file: copiedPomPath, text: originalPomContent)
 
                     // Print non-secret values for debugging
-                    echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT.toString()}"
+                    echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT}"
 
                     // Replace placeholders directly
                     def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
