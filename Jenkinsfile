@@ -1,4 +1,3 @@
-/* groovylint-disable CompileStatic, DuplicateStringLiteral, GStringExpressionWithinString, NestedBlockDepth, NoDef, VariableTypeRequired */
 pipeline {
     agent any
 
@@ -17,7 +16,6 @@ pipeline {
                         if (!fileExists('.git')) {
                             bat 'git init'
                             bat 'git remote add origin https://github.com/jayadharshini-k/final-mule.git'
-                            bat 'git fetch origin master'
                         } else {
                             echo 'Git repository already initialized.'
                         }
@@ -74,34 +72,39 @@ pipeline {
 
                     try {
                         // Print non-secret values for debugging
-                        echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT}"
+                        echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT.toString()}"
 
                         // Replace placeholders directly
                         def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
-                                                                      .replace('${cloudhub.username}', username)
-                                                                      .replace('${cloudhub.password}', password)
-                                                                      .replace('${env.BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
-                                                                      .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
+                                                                  .replace('${cloudhub.username}', username)
+                                                                  .replace('${cloudhub.password}', password)
+                                                                  .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
+                                                                  .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
 
                         // Write the modified content to the copied pom.xml file
                         writeFile(file: copiedPomPath, text: modifiedPomContent)
                         
                         // Navigate to the Git repository directory
                         dir("${WORKSPACE_PATH}") {
-                            // Build and deploy the project using the copied pom.xml
-                            bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
+                            // Check if the Git repository is initialized
+                            if (fileExists('.git')) {
+                                // Build and deploy the project using the copied pom.xml
+                                bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
+                                
+                                // Retrieve change logs using git log
+                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStatus: true).trim()
+                                echo "Changelog:\n${changelog}"
+
+                                // Send email notification for successful build with changelog
+                                emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
+                                         subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                         mimeType: 'text/plain',
+                                         to: 'jayadharshini.azuredevops@gmail.com',
+                                         attachLog: true
+                            } else {
+                                echo 'Not a Git repository. Skipping deployment and changelog retrieval.'
+                            }
                         }
-
-                        // Get the changelog
-                        def changelog = bat(script: 'git log --pretty=oneline origin/master..HEAD', returnStatus: true).text
-                        echo "Changelog:\n${changelog}"
-
-                        // Send email notification for successful build with changelog
-                        emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
-                                 subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                 mimeType: 'text/plain',
-                                 to: 'jayadharshini.azuredevops@gmail.com',
-                                 attachLog: true
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         throw e

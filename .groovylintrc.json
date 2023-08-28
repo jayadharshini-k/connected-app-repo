@@ -4,6 +4,15 @@
         "CatchException": {
             "enabled": false
         },
+        "CompileStatic": {
+            "enabled": false
+        },
+        "DuplicateStringLiteral": {
+            "enabled": false
+        },
+        "GStringExpressionWithinString": {
+            "enabled": false
+        },
         "Indentation": {
             "enabled": false
         },
@@ -13,7 +22,19 @@
         "LineLength": {
             "enabled": false
         },
+        "NestedBlockDepth": {
+            "enabled": false
+        },
+        "NoDef": {
+            "enabled": false
+        },
         "TrailingWhitespace": {
+            "enabled": false
+        },
+        "UnnecessaryToString": {
+            "enabled": false
+        },
+        "VariableTypeRequired": {
             "enabled": false
         }
     }
