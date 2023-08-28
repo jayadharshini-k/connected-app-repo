@@ -4,6 +4,12 @@
         "CatchException": {
             "enabled": false
         },
+        "Indentation": {
+            "enabled": false
+        },
+        "InvertedIfElse": {
+            "enabled": false
+        },
         "LineLength": {
             "enabled": false
         },

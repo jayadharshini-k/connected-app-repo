@@ -6,17 +6,18 @@ pipeline {
         CLOUDHUB_CREDENTIAL = credentials('a0f0c641-8967-43ea-a26c-21cbee9dc501')
         BUSINESS_GROUP_ID = credentials('MY_BUSINESS_GROUP_ID_SECRET')
         DEPLOY_ENVIRONMENT = 'dev' // Set the environment here
-        WORKSPACE_PATH = 'D:\\workspace7'
+        WORKSPACE_PATH = 'D:\\workspace9'
     }
 
     stages {
         stage('Pulling latest code') {
             steps {
                 script {
-                    dir('D:\\workspace7') {
+                    dir('D:\\workspace9') {
                         if (!fileExists('.git')) {
                             bat 'git init'
                             bat 'git remote add origin https://github.com/jayadharshini-k/final-mule.git'
+                            bat 'git fetch origin master'
                         } else {
                             echo 'Git repository already initialized.'
                         }
@@ -29,9 +30,9 @@ pipeline {
         stage('Update Project Version') {
             steps {
                 script {
-                    dir('D:\\workspace7') {
+                    dir('D:\\workspace9') {
                         def buildNumber = env.BUILD_NUMBER ?: '0'
-                        def newVersion = "7.1.${buildNumber}"
+                        def newVersion = "9.1.${buildNumber}"
                         bat "mvn versions:set -DnewVersion=${newVersion}"
 
                         // Create a version-based directory to store JAR files
@@ -49,7 +50,7 @@ pipeline {
         stage('Publish Assets to Exchange') {
             steps {
                 script {
-                    dir('D:\\workspace7') {
+                    dir('D:\\workspace9') {
                         bat 'mvn deploy'
                     }
                 }
@@ -93,6 +94,7 @@ pipeline {
 
                         // Get the changelog
                         def changelog = bat(script: 'git log --pretty=oneline origin/master..HEAD', returnStatus: true).text
+                        echo "Changelog:\n${changelog}"
 
                         // Send email notification for successful build with changelog
                         emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
@@ -112,7 +114,7 @@ pipeline {
         }
     }
 
-   post {
+    post {
         failure {
             emailext body: "The pipeline ${currentBuild.fullDisplayName} has failed. Please find the logs attached.",
                      subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
