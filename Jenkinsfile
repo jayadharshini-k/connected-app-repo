@@ -102,7 +102,7 @@ pipeline {
                                          subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
                                          mimeType: 'text/plain',
                                          to: 'jayadharshini.azuredevops@gmail.com',
-                                         attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
+                                         attachmentsPattern: '**/changelog.txt'
 
                             }
                         }
