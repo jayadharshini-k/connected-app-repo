@@ -91,16 +91,16 @@ pipeline {
                                 // Build and deploy the project using the copied pom.xml
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
                                 
-                                // Retrieve change logs using git log
-                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStatus: true).trim()
+                                def changelog = bat(script: 'git log --oneline origin/master..HEAD', returnStatus: true)
                                 echo "Changelog:\n${changelog}"
 
                                 // Send email notification for successful build with changelog
                                 emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
-                                         subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                         mimeType: 'text/plain',
-                                         to: 'jayadharshini.azuredevops@gmail.com',
-                                         attachLog: true
+                                subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                mimeType: 'text/plain',
+                                to: 'jayadharshini.azuredevops@gmail.com',
+                                attachLog: true
+
                             } else {
                                 echo 'Not a Git repository. Skipping deployment and changelog retrieval.'
                             }
