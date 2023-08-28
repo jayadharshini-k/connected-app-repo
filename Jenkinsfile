@@ -1,4 +1,4 @@
-pipeline {
+pipeline{
     agent any
 
     environment {
@@ -25,6 +25,7 @@ pipeline {
                 }
             }
         }
+    }
 
         stage('Update Project Version') {
             steps {
@@ -56,75 +57,76 @@ pipeline {
             }
         }
 
-       stage('Dev - Deploy') {
-    steps {
-        script {
-            def copiedPomPath // Declare the variable at the higher scope
+    stage('Dev - Deploy') {
+        steps {
+            script {
+                def copiedPomPath // Declare the variable at the higher scope
 
-            try {
-                // Extract username and password from combined credentials
-                def creds = CLOUDHUB_CREDENTIAL.split(':')
-                def username = creds[0]
-                def password = creds[1]
+                try {
+                    // Extract username and password from combined credentials
+                    def creds = CLOUDHUB_CREDENTIAL.split(':')
+                    def username = creds[0]
+                    def password = creds[1]
 
-                // Read the original pom.xml content
-                def originalPomContent = readFile("${WORKSPACE_PATH}\\pom.xml")
+                    // Read the original pom.xml content
+                    def originalPomContent = readFile("${WORKSPACE_PATH}\\pom.xml")
 
-                // Create a copy of the original pom.xml
-                copiedPomPath = "${WORKSPACE_PATH}\\copied-pom.xml"
-                writeFile(file: copiedPomPath, text: originalPomContent)
+                    // Create a copy of the original pom.xml
+                    copiedPomPath = "${WORKSPACE_PATH}\\copied-pom.xml"
+                    writeFile(file: copiedPomPath, text: originalPomContent)
 
-                // Print non-secret values for debugging
-                echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT.toString()}"
+                    // Print non-secret values for debugging
+                    echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT.toString()}"
 
-                // Replace placeholders directly
-                def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
-                                                          .replace('${cloudhub.username}', username)
-                                                          .replace('${cloudhub.password}', password)
-                                                          .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
-                                                          .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
+                    // Replace placeholders directly
+                    def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
+                                                            .replace('${cloudhub.username}', username)
+                                                            .replace('${cloudhub.password}', password)
+                                                            .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
+                                                            .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
 
-                // Write the modified content to the copied pom.xml file
-                writeFile(file: copiedPomPath, text: modifiedPomContent)
+                    // Write the modified content to the copied pom.xml file
+                    writeFile(file: copiedPomPath, text: modifiedPomContent)
 
-                // Navigate to the Git repository directory
-                dir("${WORKSPACE_PATH}") {
-                    // Check if the Git repository is initialized
-                    if (fileExists(".git")) {
-                        // Build and deploy the project using the copied pom.xml
-                        bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
+                    // Navigate to the Git repository directory
+                    dir("${WORKSPACE_PATH}") {
+                        // Check if the Git repository is initialized
+                        if (fileExists(".git")) {
+                            // Build and deploy the project using the copied pom.xml
+                            bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
 
-                        // Use Git Changelog plugin to generate changelog
-                        def changelog = changelogGit(
-                            from: 'origin/master',
-                            to: 'HEAD',
-                            format: 'markdown',
-                            onlyCommitters: true
-                        )
+                            // Use Git Changelog plugin to generate changelog
+                            def changelog = changelogGit(
+                                from: 'origin/master',
+                                to: 'HEAD',
+                                format: 'markdown',
+                                onlyCommitters: true
+                            )
 
-                        // Debugging: Print the changelog before sending the email
-                        echo "Changelog:\n${changelog}"
+                            // Debugging: Print the changelog before sending the email
+                            echo "Changelog:\n${changelog}"
 
-                        // Send email notification for successful build with changelog
-                        emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
-                                 subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                 mimeType: 'text/plain',
-                                 to: 'jayadharshini.azuredevops@gmail.com',
-                                 attachLog: true
-                    } else {
-                        echo "Not a Git repository. Skipping deployment and changelog retrieval."
+                            // Send email notification for successful build with changelog
+                            emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\nChangelog:\n${changelog}",
+                                    subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                    mimeType: 'text/plain',
+                                    to: 'jayadharshini.azuredevops@gmail.com',
+                                    attachLog: true
+                        } else {
+                            echo "Not a Git repository. Skipping deployment and changelog retrieval."
+                        }
                     }
-                }
-            } catch (Exception e) {
-                // Debugging: Print the exception details for troubleshooting
-                echo "Error: ${e}"
+                } catch (Exception e) {
+                    // Debugging: Print the exception details for troubleshooting
+                    echo "Error: ${e}"
 
-                currentBuild.result = 'FAILURE'
-                throw e
-            } finally {
-                if (copiedPomPath) {
-                    // Delete the copied pom.xml after deployment
-                    bat "del ${copiedPomPath}"
+                    currentBuild.result = 'FAILURE'
+                    throw e
+                } finally {
+                    if (copiedPomPath) {
+                        // Delete the copied pom.xml after deployment
+                        bat "del ${copiedPomPath}"
+                    }
                 }
             }
         }
