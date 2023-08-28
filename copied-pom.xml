@@ -97,7 +97,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>${deploy.environment}</id>
+            <id>dev</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -113,13 +113,13 @@
                             <cloudhub2Deployment>
                                 <uri>https://anypoint.mulesoft.com</uri>
                                 <provider>MC</provider>
-                                <environment>${deploy.environment}</environment>
+                                <environment>dev</environment>
                                 <target>Cloudhub-US-East-2</target>
                                 <muleVersion>4.4.0</muleVersion>
                                 <server>anypoint-exchange-v3</server>
-                                <username>${cloudhub.username}</username>
-                                <password>${cloudhub.password}</password>
-                                <applicationName>start-${deploy.environment}-app</applicationName>
+                                <username>jayadharshini</username>
+                                <password>English$270901</password>
+                                <applicationName>start-dev-app</applicationName>
                                 <businessGroupId>${env.BUSINESS_GROUP_ID}</businessGroupId>
                                 <replicas>1</replicas>
                                 <vCores>0.1</vCores>
