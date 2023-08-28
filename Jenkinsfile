@@ -1,4 +1,5 @@
-pipeline{
+/* groovylint-disable GStringExpressionWithinString, LineLength, NestedBlockDepth, NoDef, VariableTypeRequired */
+pipeline {
     agent any
 
     environment {
@@ -12,13 +13,14 @@ pipeline{
         stage('Pulling latest code') {
             steps {
                 script {
+                    /* groovylint-disable-next-line DuplicateStringLiteral, NestedBlockDepth */
                     dir('D:\\workspace9') {
-                        if (!fileExists(".git")) {
+                        if (!fileExists('.git')) {
                             bat 'git init'
                             bat 'git remote add origin https://github.com/jayadharshini-k/final-mule.git'
                             bat 'git fetch origin master'
                         } else {
-                            echo "Git repository already initialized."
+                            echo 'Git repository already initialized.'
                         }
                         bat 'git pull origin master'
                     }
@@ -30,8 +32,11 @@ pipeline{
         stage('Update Project Version') {
             steps {
                 script {
+                    /* groovylint-disable-next-line DuplicateStringLiteral */
                     dir('D:\\workspace9') {
+                        /* groovylint-disable-next-line NoDef, VariableTypeRequired */
                         def buildNumber = env.BUILD_NUMBER ?: '0'
+                        /* groovylint-disable-next-line NoDef, VariableTypeRequired */
                         def newVersion = "9.1.${buildNumber}"
                         bat "mvn versions:set -DnewVersion=${newVersion}"
 
@@ -40,7 +45,7 @@ pipeline{
                         bat "mkdir ${versionDir}"
 
                         // Create a JAR with the new version and move it to the version-based directory
-                        bat "mvn clean package"
+                        bat 'mvn clean package'
                         bat "move target\\*.jar ${versionDir}"
                     }
                 }
@@ -51,7 +56,7 @@ pipeline{
             steps {
                 script {
                     dir('D:\\workspace9') {
-                        bat "mvn deploy"
+                        bat 'mvn deploy'
                     }
                 }
             }
@@ -91,7 +96,7 @@ pipeline{
                     // Navigate to the Git repository directory
                     dir("${WORKSPACE_PATH}") {
                         // Check if the Git repository is initialized
-                        if (fileExists(".git")) {
+                        if (fileExists('.git')) {
                             // Build and deploy the project using the copied pom.xml
                             bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
 
@@ -113,7 +118,7 @@ pipeline{
                                     to: 'jayadharshini.azuredevops@gmail.com',
                                     attachLog: true
                         } else {
-                            echo "Not a Git repository. Skipping deployment and changelog retrieval."
+                            echo 'Not a Git repository. Skipping deployment and changelog retrieval.'
                         }
                     }
                 } catch (Exception e) {
