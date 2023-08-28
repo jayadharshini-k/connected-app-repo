@@ -76,10 +76,10 @@ pipeline {
 
                         // Replace placeholders directly
                         def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
-                                                                .replace('${cloudhub.username}', username)
-                                                                .replace('${cloudhub.password}', password)
-                                                                .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
-                                                                .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
+                                                                  .replace('${cloudhub.username}', username)
+                                                                  .replace('${cloudhub.password}', password)
+                                                                  .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
+                                                                  .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
 
                         // Write the modified content to the copied pom.xml file
                         writeFile(file: copiedPomPath, text: modifiedPomContent)
@@ -89,7 +89,7 @@ pipeline {
                             // Check if the Git repository is initialized
                             if (fileExists('.git')) {
                                 // Add command to change workspace permissions
-                                bat "chmod -R 755 ${WORKSPACE_PATH}"
+                                bat "icacls ${WORKSPACE_PATH} /grant \"${env.COMPUTERNAME}\\${env.USERNAME}:(OI)(CI)F\" /T"
 
                                 // Build and deploy the project using the copied pom.xml
                                 bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -X -f ${copiedPomPath}"
@@ -102,15 +102,13 @@ pipeline {
 
                                 // Send email notification for successful build with changelog attached
                                 emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\n",
-                                        subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
-                                        mimeType: 'text/plain',
-                                        to: 'jayadharshini.azuredevops@gmail.com',
-                                        attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
+                                         subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
+                                         mimeType: 'text/plain',
+                                         to: 'jayadharshini.azuredevops@gmail.com',
+                                         attachmentsPattern: "${WORKSPACE_PATH}\\changelog.txt"
 
                                 // Add command to change workspace permissions back
-                                bat "chmod -R 755 ${WORKSPACE_PATH}"
-                            } else {
-                                echo 'Not a Git repository. Skipping deployment and changelog retrieval.'
+                                bat "icacls ${WORKSPACE_PATH} /reset /T"
                             }
                         }
                     } catch (Exception e) {
@@ -122,6 +120,16 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        failure {
+            emailext body: "The pipeline ${currentBuild.fullDisplayName} has failed. Please find the logs attached.",
+                     subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
+                     mimeType: 'text/plain',
+                     to: 'jayadharshini.azuredevops@gmail.com',
+                     attachLog: true  // Attach build log
         }
     }
 }
