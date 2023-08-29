@@ -95,14 +95,14 @@ pipeline {
                                 def changelog = bat(script: 'git log origin/master', returnStdout: true).trim()
 
                                 // Write changelog content to a file
-                                writeFile(file: "${WORKSPACE_PATH}\\changelog.txt", text: changelog)
+                                writeFile(file: "${WORKSPACE_PATH}\\changelog-dev.txt", text: changelog)
 
                                 // Send email notification for successful build with changelog attached
                                 emailext body: "The pipeline ${currentBuild.fullDisplayName} has succeeded.\n",
                                          subject: "Pipeline Succeeded: ${currentBuild.fullDisplayName}",
                                          mimeType: 'text/plain',
                                          to: 'jayadharshini.azuredevops@gmail.com',
-                                         attachmentsPattern: 'D:\\workspace9\\changelog.txt'
+                                         attachmentsPattern: '**/changelog-dev.txt'
 
                             }
                         }
