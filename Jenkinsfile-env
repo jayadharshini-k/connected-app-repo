@@ -46,11 +46,12 @@ pipeline {
 
                             // Build and deploy the project using the copied pom.xml
                             bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -f copied-pom.xml -X"
+                            // Clean up the JAR file 
+                            bat "del *.jar"
                         }
                     } finally {
                         // Delete the copied pom.xml using the 'del' command
                         bat "del ${copiedPomPath}"
-                        bat "del flowstest-${versionToDeploy}-mule-application"
                     }
                 }
             }
