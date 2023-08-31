@@ -50,6 +50,7 @@ pipeline {
                     } finally {
                         // Delete the copied pom.xml using the 'del' command
                         bat "del ${copiedPomPath}"
+                        bat "del flowstest-${versionToDeploy}-mule-application"
                     }
                 }
             }
