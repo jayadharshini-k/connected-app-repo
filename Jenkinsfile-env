@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        CLOUDHUB_CREDENTIAL = credentials('a0f0c641-8967-43ea-a26c-21cbee9dc501')
+        BUSINESS_GROUP_ID = credentials('MY_BUSINESS_GROUP_ID_SECRET')
+        WORKSPACE_PATH = 'D:\\workspace9'
+    }
+
+    stages {
+        stage('Deploy') {
+            steps {
+                script {
+                    def versionToDeploy = "${params.VERSION_TO_DEPLOY}"
+
+                    // Extract username and password from combined credentials
+                    def creds = CLOUDHUB_CREDENTIAL.split(':')
+                    def username = creds[0]
+                    def password = creds[1]
+
+                    // Read the original pom.xml content
+                    def originalPomContent = readFile("${WORKSPACE_PATH}\\pom.xml")
+
+                    // Create a copy of the original pom.xml
+                    def copiedPomPath = "${WORKSPACE_PATH}\\copied-pom.xml"
+                    writeFile(file: copiedPomPath, text: originalPomContent)
+
+                    try {
+                        // Replace placeholders directly in the copied pom.xml
+                        def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
+                                                                      .replace('${cloudhub.username}', username)
+                                                                      .replace('${cloudhub.password}', password)
+                                                                      .replace('${env.BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
+                                                                      .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
+
+                        // Write the modified content to the copied pom.xml file
+                        writeFile(file: copiedPomPath, text: modifiedPomContent)
+
+                        // Continue with your build process
+                        dir("${WORKSPACE_PATH}") {
+                            // Pull the specified JAR version from the workspace
+                            bat "copy D:\\workspace9\\jars_${versionToDeploy}\\*.jar ."
+
+                            // Update version in copied pom.xml file
+                            bat "mvn versions:set -DnewVersion=${versionToDeploy} -f copied-pom.xml"
+
+                            // Build and deploy the project using the copied pom.xml
+                            bat "mvn clean deploy -DmuleDeploy -P${DEPLOY_ENVIRONMENT} -f copied-pom.xml -X"
+                        }
+                    } finally {
+                        // Delete the copied pom.xml using the 'del' command
+                        bat "del ${copiedPomPath}"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        failure {
+            emailext body: "The pipeline ${currentBuild.fullDisplayName} has failed. Please find the logs attached.",
+                     subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
+                     mimeType: 'text/plain',
+                     to: 'jayadharshini.azuredevops@gmail.com',
+                     attachLog: true  // Attach build log
+        }
+    }
+}
+
