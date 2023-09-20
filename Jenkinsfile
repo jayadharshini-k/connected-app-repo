@@ -19,7 +19,7 @@ pipeline {
                         } else {
                             echo 'Git repository already initialized.'
                         }
-                        bat 'git pull origin main'
+                        bat 'git pull origin master'
                     }
                 }
             }
