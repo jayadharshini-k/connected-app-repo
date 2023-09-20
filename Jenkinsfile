@@ -71,7 +71,6 @@ pipeline {
                                                               .replaceAll('CONN_APP_CLIENT_SECRET', client_secret)
                                                               .replaceAll('BUSINESS_GROUP_ID', BUSINESS_GROUP_ID)
                                                               .replaceAll('dev', DEPLOY_ENVIRONMENT)
-                                                              .replaceAll('${env.BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
                                                               .replaceAll('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
 
                     // Write the modified content to the copied pom.xml file
