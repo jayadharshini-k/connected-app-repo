@@ -67,10 +67,10 @@ pipeline {
                     def originalPomContent = readFile("${WORKSPACE_PATH}\\pom.xml")
 
                     // Replace placeholders directly
-                    def modifiedPomContent = originalPomContent.replaceAll('${env.CONN_APP_CLIENT_ID}', client_id)
-                                                              .replaceAll('${env.CONN_APP_CLIENT_SECRET}', client_secret)
-                                                              .replaceAll('${env.BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
-                                                              .replaceAll('${deploy.environment}', DEPLOY_ENVIRONMENT)
+                    def modifiedPomContent = originalPomContent.replaceAll('\\$\\{env.CONN_APP_CLIENT_ID\\}', client_id)
+                                                            .replaceAll('\\$\\{env.CONN_APP_CLIENT_SECRET\\}', client_secret)
+                                                            .replaceAll('\\$\\{env.BUSINESS_GROUP_ID\\}', BUSINESS_GROUP_ID)
+                                                            .replaceAll('\\$\\{deploy.environment\\}', DEPLOY_ENVIRONMENT)
 
                     // Write the modified content to the copied pom.xml file
                     def copiedPomPath = "${WORKSPACE_PATH}\\copied-pom.xml"
