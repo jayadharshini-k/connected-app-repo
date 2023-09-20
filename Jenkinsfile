@@ -2,24 +2,24 @@ pipeline {
     agent any
 
     environment {
-        CLOUDHUB_CREDENTIAL = credentials('a0f0c641-8967-43ea-a26c-21cbee9dc501')
+        CONNECTED_APP_CREDENTIAL = credentials('3f28a56e-de58-498c-9edc-d98cb8d9838d')
         BUSINESS_GROUP_ID = credentials('MY_BUSINESS_GROUP_ID_SECRET')
         DEPLOY_ENVIRONMENT = 'dev' // Set the environment here
-        WORKSPACE_PATH = 'D:\\workspace9'
+        WORKSPACE_PATH = 'D:\\connected-app'
     }
 
     stages {
         stage('Pulling latest code') {
             steps {
                 script {
-                    dir('D:\\workspace9') {
+                    dir('D:\\connected-app') {
                         if (!fileExists('.git')) {
                             bat 'git init'
-                            bat 'git remote add origin https://github.com/jayadharshini-k/final-mule.git'
+                            bat 'git remote add origin https://github.com/jayadharshini-k/connected-app-repo.git'
                         } else {
                             echo 'Git repository already initialized.'
                         }
-                        bat 'git pull origin master'
+                        bat 'git pull origin main'
                     }
                 }
             }
@@ -28,7 +28,7 @@ pipeline {
         stage('Update Project Version') {
             steps {
                 script {
-                    dir('D:\\workspace9') {
+                    dir('D:\\connected-app') {
                         def buildNumber = env.BUILD_NUMBER ?: '0'
                         def newVersion = "9.1.${buildNumber}"
                         bat "mvn versions:set -DnewVersion=${newVersion}"
@@ -48,7 +48,7 @@ pipeline {
         stage('Publish Assets to Exchange') {
             steps {
                 script {
-                    dir('D:\\workspace9') {
+                    dir('D:\\connected-app') {
                         bat 'mvn deploy'
                     }
                 }
@@ -59,31 +59,29 @@ pipeline {
             steps {
                 script {
                     // Extract username and password from combined credentials
-                    def creds = CLOUDHUB_CREDENTIAL.split(':')
-                    def username = creds[0]
-                    def password = creds[1]
+                    def creds = CONNECTED_APP_CREDENTIAL.split(':')
+                    def client_id = creds[0]
+                    def client_secret = creds[1]
 
                     // Read the original pom.xml content
                     def originalPomContent = readFile("${WORKSPACE_PATH}\\pom.xml")
 
-                    // Create a copy of the original pom.xml
+                    // Replace placeholders directly
+                    def modifiedPomContent = originalPomContent.replaceAll('CONN_APP_CLIENT_ID', client_id)
+                                                              .replaceAll('CONN_APP_CLIENT_SECRET', client_secret)
+                                                              .replaceAll('BUSINESS_GROUP_ID', BUSINESS_GROUP_ID)
+                                                              .replaceAll('dev', DEPLOY_ENVIRONMENT)
+                                                              .replaceAll('${env.BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
+                                                              .replaceAll('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
+
+                    // Write the modified content to the copied pom.xml file
                     def copiedPomPath = "${WORKSPACE_PATH}\\copied-pom.xml"
-                    writeFile(file: copiedPomPath, text: originalPomContent)
+                    writeFile(file: copiedPomPath, text: modifiedPomContent)
 
                     try {
                         // Print non-secret values for debugging
                         echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT.toString()}"
 
-                        // Replace placeholders directly
-                        def modifiedPomContent = originalPomContent.replace('${deploy.environment}', DEPLOY_ENVIRONMENT)
-                                                                  .replace('${cloudhub.username}', username)
-                                                                  .replace('${cloudhub.password}', password)
-                                                                  .replace('${BUSINESS_GROUP_ID}', BUSINESS_GROUP_ID)
-                                                                  .replace('${deploy.environment}-app', "${DEPLOY_ENVIRONMENT}-app")
-
-                        // Write the modified content to the copied pom.xml file
-                        writeFile(file: copiedPomPath, text: modifiedPomContent)
-                        
                         // Navigate to the Git repository directory
                         dir("${WORKSPACE_PATH}") {
                             // Check if the Git repository is initialized

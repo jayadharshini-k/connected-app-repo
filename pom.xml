@@ -3,16 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>c5086b09-e718-47d0-8ff7-9c7bd0152544</groupId>
+    <groupId>2704adf0-911e-413c-b04e-8ad783654702</groupId>
     <artifactId>flowstest</artifactId>
     <version>9.1.20</version>
     <packaging>mule-application</packaging>
     <name>flowstest</name>
     <description />
-    <!-- Added Comments - 1 -->
-    <!-- Added Comments - 2 -->
-
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -117,8 +113,9 @@
                                 <target>Cloudhub-US-East-2</target>
                                 <muleVersion>4.4.0</muleVersion>
                                 <server>anypoint-exchange-v3</server>
-                                <username>${cloudhub.username}</username>
-                                <password>${cloudhub.password}</password>
+                                <connectedAppClientId>CONN_APP_CLIENT_ID</connectedAppClientId>
+                                <connectedAppClientSecret>CONN_APP_CLIENT_SECRET</connectedAppClientSecret>
+                                <connectedAppGrantType>client_credentials</connectedAppGrantType>
                                 <applicationName>start-${deploy.environment}-app</applicationName>
                                 <businessGroupId>${env.BUSINESS_GROUP_ID}</businessGroupId>
                                 <replicas>1</replicas>
@@ -172,7 +169,7 @@
         <repository>
             <id>anypoint-exchange-v3</id>
             <name>Corporate Repository</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v3/organizations/c5086b09-e718-47d0-8ff7-9c7bd0152544/maven</url>
+            <url>https://maven.anypoint.mulesoft.com/api/v3/organizations/2704adf0-911e-413c-b04e-8ad783654702/maven</url>
             <layout>default</layout>
         </repository>
     </distributionManagement>
