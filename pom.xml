@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>2704adf0-911e-413c-b04e-8ad783654702</groupId>
     <artifactId>flowstest</artifactId>
-    <version>9.1.7</version>
+    <version>9.1.8</version>
     <packaging>mule-application</packaging>
     <name>flowstest</name>
     <description />
@@ -113,11 +113,11 @@
                                 <target>Cloudhub-US-East-2</target>
                                 <muleVersion>4.4.0</muleVersion>
                                 <server>anypoint-exchange-v3</server>
-                                <connectedAppClientId>${CONN_APP_CLIENT_ID}</connectedAppClientId>
-                                <connectedAppClientSecret>${CONN_APP_CLIENT_SECRET}</connectedAppClientSecret>
+                                <connectedAppClientId>${env.CONN_APP_CLIENT_ID}</connectedAppClientId>
+                                <connectedAppClientSecret>${env.CONN_APP_CLIENT_SECRET}</connectedAppClientSecret>
                                 <connectedAppGrantType>client_credentials</connectedAppGrantType>
                                 <applicationName>start-${deploy.environment}-app</applicationName>
-                                <businessGroupId>${BUSINESS_GROUP_ID}</businessGroupId>
+                                <businessGroupId>${env.BUSINESS_GROUP_ID}</businessGroupId>
                                 <replicas>1</replicas>
                                 <vCores>0.1</vCores>
                             </cloudhub2Deployment>
